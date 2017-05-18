@@ -27,7 +27,7 @@ use URI::Encode qw(uri_encode uri_decode);
 
 # Globals
 my $debug_mode     = 0;
-my $is_terminal    = 1;
+my $is_terminal    = 0;
 my $giphy_url      = "http://api.giphy.com/v1/gifs/search?";
 my $public_api_key = "api_key=dc6zaTOxFJmzC";
 my $limit_num      = "1";
