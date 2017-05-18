@@ -38,7 +38,7 @@ my $limit_num      = "1";
 sub main() {
 
     # Input validation
-    if ($#ARGV < 1) {
+    if ($#ARGV < 0) {
         print "No search terms were provided. Exiting...\n";
         return 1;
     }

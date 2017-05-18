@@ -29,7 +29,7 @@ Simply use this as-is in the commandline, by setting the "$is_terminal"
 variable to 1.
 
 
-# Running sighte
+# Running giphy-perl 
 
 Usage:
 
