@@ -46,13 +46,50 @@ $PUBLIC_API_KEY = "api_key=dc6zaTOxFJmzC";
 $LIMIT_NUM      = "1";
 
 #
+# Print script usage.
+#
+sub print_usage {
+    my ($server, $target) = @_;
+    $server->command("msg $target Usage: !giphy <search terms>");
+}
+
+#
 # Obtain an image using the giphy API.
 #
-sub get_giphy_image($$) {
+sub get_giphy_image {
+
+    # Params
+    my ($server, $msg, $nick, $address, $target) = @_;
+
+    # Param handling
+    if (!$server || !defined $msg || !defined $nick || length($nick) < 1
+      || !defined $address || length($address) < 1 || !defined $target
+      || length($target) < 1) {
+        Irssi::print "Invalid message input.";
+        return 1;
+    }
+
+    # Lower case the search terms, and break them up into an array.
+    $msg = lc($msg);
+    my @msg_parts = split($msg);
+
+    # Exit if unable to split.
+    if (!@msg_parts) {
+        Irssi::print "Unable to split public message content.";
+        return 1;
+    }
+
+    # Check that the user actually typed `!giphy`, else exit.
+    if ($msg_parts[0] != "!giphy") {
+        if ($DEBUG_MODE) {
+            Irssi::print "Giphy not declared.";
+        }
+        return 0;
+    }
 
     # Obtain the search terms.
     my $search_terms = "";
-    for (@_) {
+    for (@msg_parts) {
          if (!$_) {
          } elsif ($search_terms eq "") {
              $search_terms = uri_encode($_);
@@ -63,7 +100,7 @@ sub get_giphy_image($$) {
 
     # If the search term is blank, go ahead and return 1.
     if (length($search_terms) < 1) {
-        Irssi::print "Invalid search terms. Terminating...";
+        print_usage();
         return 1;
     }
 
@@ -136,12 +173,12 @@ sub get_giphy_image($$) {
         return 1;
     }
 
-    # Print the URL to stdout.
-    Irssi::print $json_data_array[0][0]{"images"}{"original"}{"url"};
+    # Grab the response...
+    my $response = $json_data_array[0][0]{"images"}{"original"}{"url"};
 
     # All is well, so return 0.
     return 0;
 }
 
 ################################################
-Irssi::command_bind('giphy', 'get_giphy_image');
+Irssi::signal_add('message public', 'get_giphy_image');
