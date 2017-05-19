@@ -54,24 +54,61 @@ sub print_usage {
 }
 
 #
-# Obtain an image using the giphy API.
+# Handle the case when dealing with public messages.
 #
-sub get_giphy_image {
-
-    # Params
+sub sig_msg_pub {
     my ($server, $msg, $nick, $address, $target) = @_;
 
     # Param handling
     if (!$server || !defined $msg || !defined $nick || length($nick) < 1
       || !defined $address || length($address) < 1 || !defined $target
       || length($target) < 1) {
-        Irssi::print "Invalid message input.";
+        Irssi::print "sig_msg_pub() --> Invalid message input.";
         return 1;
+    }
+
+    # attempt to grab a giphy link
+    get_giphy_image($server, $msg, $target);
+}
+
+#
+# Handle the case when dealing with one's own input.
+#
+sub sig_msg_own_pub {
+    my ($server, $msg, $target) = @_;
+
+    # Param handling
+    if (!$server || !defined $msg || !defined $target
+      || length($target) < 1) {
+        Irssi::print "sig_msg_own_pub() --> Invalid message input.";
+        return 1;
+    }
+
+    # attempt to grab a giphy link
+    get_giphy_image($server, $msg, $target);
+}
+
+#
+# Obtain an image using the giphy API.
+#
+sub get_giphy_image {
+    my ($server, $msg, $target) = @_;
+
+    # Param handling
+    if (!$server || !defined $msg || !defined $target
+      || length($target) < 1) {
+        Irssi::print "get_giphy_image() --> Invalid message input.";
+        return 1;
+    }
+
+    # Debug, print message content.
+    if ($DEBUG_MODE) {
+        Irssi::print "Message was: $msg";
     }
 
     # Lower case the search terms, and break them up into an array.
     $msg = lc($msg);
-    my @msg_parts = split($msg);
+    my @msg_parts = split / /, $msg;
 
     # Exit if unable to split.
     if (!@msg_parts) {
@@ -176,9 +213,13 @@ sub get_giphy_image {
     # Grab the response...
     my $response = $json_data_array[0][0]{"images"}{"original"}{"url"};
 
+    # Out the response to the public message channel.
+    $server->command("msg $target $response");
+
     # All is well, so return 0.
     return 0;
 }
 
-################################################
-Irssi::signal_add('message public', 'get_giphy_image');
+############################################################
+Irssi::signal_add('message public', 'sig_msg_pub');
+Irssi::signal_add('message own_public', 'sig_msg_own_pub');
