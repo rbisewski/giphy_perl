@@ -117,7 +117,7 @@ sub get_giphy_image {
     }
 
     # Check that the user actually typed `!giphy`, else exit.
-    if ($msg_parts[0] != "!giphy") {
+    if ($msg_parts[0] ne "!giphy") {
         if ($DEBUG_MODE) {
             Irssi::print "Giphy not declared.";
         }
@@ -125,19 +125,32 @@ sub get_giphy_image {
     }
 
     # Obtain the search terms.
+    my $term_counter = 0;
     my $search_terms = "";
     for (@msg_parts) {
+
+         # Handle the case of blank or initial values.
          if (!$_) {
-         } elsif ($search_terms eq "") {
+             next;
+         } elsif ($term_counter == 0) {
+             $term_counter++;
+             next;
+         }
+
+         # Append search terms...
+         if ($search_terms eq "") {
              $search_terms = uri_encode($_);
          } else {
              $search_terms = $search_terms . "+" . uri_encode($_);
          }
+
+         # Increment the term counter
+         $term_counter++;
     }
 
     # If the search term is blank, go ahead and return 1.
     if (length($search_terms) < 1) {
-        print_usage();
+        print_usage($server, $target);
         return 1;
     }
 
