@@ -226,6 +226,15 @@ sub get_giphy_image {
     # Grab the response...
     my $response = $json_data_array[0][0]{"images"}{"original"}{"url"};
 
+    # Ensure the response is actually valid.
+    if (length($response) < 1) {
+        Irssi::print "Invalid response detected. Terminating...";
+        return 1;
+    }
+
+    # Remove the http/s initial portion, if present.
+    $response =~ s/https?:\/\///g;
+
     # Out the response to the public message channel.
     $server->command("msg $target $response");
 
