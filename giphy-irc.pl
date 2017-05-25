@@ -212,19 +212,13 @@ sub get_giphy_image {
     } elsif (!$json_data_array[0][0]) {
         Irssi::print "Broken JSON detected. Terminating...";
         return 1;
-    } elsif (!$json_data_array[0][0]{"images"}) {
-        Irssi::print "Broken JSON detected. Terminating...";
-        return 1;
-    } elsif (!$json_data_array[0][0]{"images"}{"original"}) {
-        Irssi::print "Broken JSON detected. Terminating...";
-        return 1;
-    } elsif (!$json_data_array[0][0]{"images"}{"original"}{"url"}) {
+    } elsif (!$json_data_array[0][0]{"embed_url"}) {
         Irssi::print "Broken JSON detected. Terminating...";
         return 1;
     }
 
     # Grab the response...
-    my $response = $json_data_array[0][0]{"images"}{"original"}{"url"};
+    my $response = $json_data_array[0][0]{"embed_url"};
 
     # Ensure the response is actually valid.
     if (length($response) < 1) {

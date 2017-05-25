@@ -111,16 +111,12 @@ sub main() {
         return 1;
     } elsif (!$json_data_array[0][0]) {
         return 1;
-    } elsif (!$json_data_array[0][0]{"images"}) {
-        return 1;
-    } elsif (!$json_data_array[0][0]{"images"}{"original"}) {
-        return 1;
-    } elsif (!$json_data_array[0][0]{"images"}{"original"}{"url"}) {
+    } elsif (!$json_data_array[0][0]{"embed_url"}) {
         return 1;
     }
 
     # Print the URL to stdout.
-    print $json_data_array[0][0]{"images"}{"original"}{"url"};
+    print $json_data_array[0][0]{"embed_url"};
 
     # If this is a terminal, go ahead and print out a newline.
     if ($is_terminal) {
