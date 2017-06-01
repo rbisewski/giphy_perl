@@ -38,7 +38,7 @@ $VERSION = '1.0';
     description => 'Obtains a giphy image based on the search criteria',
     license     => 'Public Domain',
     url         => 'https://gitlab.com/giphy-perl/',
-    changed     => 'Fri May 19 14:05:21 CDT 2017',
+    changed     => 'Thu June 1 14:05:21 CDT 2017',
 );
 $DEBUG_MODE     = 0;
 $GIPHY_URL      = "http://api.giphy.com/v1/gifs/search?";
@@ -50,7 +50,7 @@ $LIMIT_NUM      = "1";
 #
 sub print_usage {
     my ($server, $target) = @_;
-    $server->command("msg $target Usage: !giphy <search terms>");
+    $server->command("msg $target Usage: .giphy <search terms>");
 }
 
 #
@@ -117,7 +117,7 @@ sub get_giphy_image {
     }
 
     # Check that the user actually typed `!giphy`, else exit.
-    if ($msg_parts[0] ne "!giphy") {
+    if ($msg_parts[0] !~ /^(?:!|\.)giphy$/) {
         if ($DEBUG_MODE) {
             Irssi::print "Giphy not declared.";
         }
@@ -227,10 +227,19 @@ sub get_giphy_image {
     }
 
     # Remove the http/s initial portion, if present.
-    $response =~ s/https?:\/\///g;
+    #
+    # TODO: delete this old logic
+    #
+    #$response =~ s/https?:\/\///g;
 
     # Out the response to the public message channel.
-    $server->command("msg $target $response");
+    #
+    # TODO: delete this old logic
+    #
+    #$server->command("msg $target \002$response");
+
+    # Out the response to the public message channel.
+    $server->command("action $target $response");
 
     # All is well, so return 0.
     return 0;
