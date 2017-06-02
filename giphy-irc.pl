@@ -6,11 +6,11 @@
 #
 # Usage:
 #
-#    giphy.pl <search phrase>
+#    .giphy <search phrase>
 #
 # Example:
 #
-#    giphy.pl funny cats
+#    .giphy funny cats
 #
 # ---
 #
@@ -60,11 +60,16 @@ sub sig_msg_pub {
     my ($server, $msg, $nick, $address, $target) = @_;
 
     # Param handling
-    if (!$server || !defined $msg || !defined $nick || length($nick) < 1
-      || !defined $address || length($address) < 1 || !defined $target
-      || length($target) < 1) {
+    if (!$server || !defined $msg || length($msg) < 1 || !defined $nick
+      || length($nick) < 1 || !defined $address || length($address) < 1
+      || !defined $target || length($target) < 1) {
         Irssi::print "sig_msg_pub() --> Invalid message input.";
         return 1;
+    }
+
+    # If not giphy then leave immediately.
+    if ($msg !~ /^(?:!|\.)giphy /) {
+        return 0;
     }
 
     # attempt to grab a giphy link
@@ -78,11 +83,24 @@ sub sig_msg_own_pub {
     my ($server, $msg, $target) = @_;
 
     # Param handling
-    if (!$server || !defined $msg || !defined $target
+    if (!$server || !defined $msg || length($msg) < 1 || !defined $target
       || length($target) < 1) {
         Irssi::print "sig_msg_own_pub() --> Invalid message input.";
         return 1;
     }
+
+    # If not giphy then leave immediately.
+    if ($msg !~ /^(?:!|\.)giphy /) {
+        return 0;
+    }
+
+    # Suppress the signal if starts with .giphy or !giphy
+    Irssi::signal_stop();
+
+    # Replicate the original request for the sake of the end-user; note
+    # that a bell character was added as a workaround otherwise the server
+    # will attempt to rebroadcast, causing an infinite memory loop in perl.
+    $server->command("msg $target \007$msg");
 
     # attempt to grab a giphy link
     get_giphy_image($server, $msg, $target);
@@ -225,18 +243,6 @@ sub get_giphy_image {
         Irssi::print "Invalid response detected. Terminating...";
         return 1;
     }
-
-    # Remove the http/s initial portion, if present.
-    #
-    # TODO: delete this old logic
-    #
-    #$response =~ s/https?:\/\///g;
-
-    # Out the response to the public message channel.
-    #
-    # TODO: delete this old logic
-    #
-    #$server->command("msg $target \002$response");
 
     # Out the response to the public message channel.
     $server->command("action $target $response");
