@@ -224,19 +224,21 @@ sub get_giphy_image {
 
     # If certain elements are not available, end the program since the
     # giphy API has likely changed.
+    #
+    # This checking is a little less robust now that we output on no
+    # result.
     if (!$json_data_array[0]) {
-        Irssi::print "Broken JSON detected. Terminating...";
-        return 1;
-    } elsif (!$json_data_array[0][0]) {
-        Irssi::print "Broken JSON detected. Terminating...";
-        return 1;
-    } elsif (!$json_data_array[0][0]{"embed_url"}) {
         Irssi::print "Broken JSON detected. Terminating...";
         return 1;
     }
 
-    # Grab the response...
-    my $response = $json_data_array[0][0]{"embed_url"};
+    my $response;
+    if ($json_data_array[0][0]{"embed_url"}) {
+        # Grab the response...
+        $response = $json_data_array[0][0]{"embed_url"};
+    } else {
+        $response = "giphy: No results found.";
+    }
 
     # Ensure the response is actually valid.
     if (length($response) < 1) {
