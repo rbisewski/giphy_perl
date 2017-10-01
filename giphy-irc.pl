@@ -94,6 +94,9 @@ sub sig_msg_own_pub {
         return 0;
     }
 
+    # Fixes message ordering
+    Irssi::signal_continue($server, $msg, $target);
+
     # attempt to grab a giphy link
     get_giphy_image($server, $msg, $target);
 }
