@@ -94,13 +94,8 @@ sub sig_msg_own_pub {
         return 0;
     }
 
-    # Suppress the signal if starts with .giphy or !giphy
-    Irssi::signal_stop();
-
-    # Replicate the original request for the sake of the end-user; note
-    # that a bell character was added as a workaround otherwise the server
-    # will attempt to rebroadcast, causing an infinite memory loop in perl.
-    $server->command("msg $target \007$msg");
+    # Fixes message ordering
+    Irssi::signal_continue($server, $msg, $target);
 
     # attempt to grab a giphy link
     get_giphy_image($server, $msg, $target);
@@ -224,19 +219,21 @@ sub get_giphy_image {
 
     # If certain elements are not available, end the program since the
     # giphy API has likely changed.
+    #
+    # This checking is a little less robust now that we output on no
+    # result.
     if (!$json_data_array[0]) {
-        Irssi::print "Broken JSON detected. Terminating...";
-        return 1;
-    } elsif (!$json_data_array[0][0]) {
-        Irssi::print "Broken JSON detected. Terminating...";
-        return 1;
-    } elsif (!$json_data_array[0][0]{"embed_url"}) {
         Irssi::print "Broken JSON detected. Terminating...";
         return 1;
     }
 
-    # Grab the response...
-    my $response = $json_data_array[0][0]{"embed_url"};
+    my $response;
+    if ($json_data_array[0][0]{"embed_url"}) {
+        # Grab the response...
+        $response = $json_data_array[0][0]{"embed_url"};
+    } else {
+        $response = "giphy: No results found.";
+    }
 
     # Ensure the response is actually valid.
     if (length($response) < 1) {

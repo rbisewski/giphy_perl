@@ -108,11 +108,11 @@ sub main() {
     # If certain elements are not available, end the program since the
     # giphy API has likely changed.
     if (!$json_data_array[0]) {
-        return 1;
+        return no_results();
     } elsif (!$json_data_array[0][0]) {
-        return 1;
+        return no_results();
     } elsif (!$json_data_array[0][0]{"embed_url"}) {
-        return 1;
+        return no_results();
     }
 
     # Print the URL to stdout.
@@ -125,6 +125,17 @@ sub main() {
 
     # All is well, so return 0.
     return 0;
+}
+
+sub no_results() {
+    print "No results found";
+
+    # If this is a terminal, go ahead and print out a newline.
+    if ($is_terminal) {
+        print "\n";
+    }
+
+    return 1;
 }
 
 #############
